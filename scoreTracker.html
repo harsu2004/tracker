@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Score Tracker</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+        .form-container {
+            margin-bottom: 20px;
+        }
+        input[type="text"], input[type="number"] {
+            padding: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Game Score Tracker</h1>
+
+    <!-- Form to add a player's name and score -->
+    <div class="form-container">
+        <label for="player">Player:</label>
+        <!-- Dropdown to select existing players -->
+        <select id="player" onchange="updatePlayerName()">
+            <option value="">Select Player</option>
+        </select>
+
+        <label for="name">Player Name:</label>
+        <input type="text" id="name" placeholder="Enter player's name" required>
+        
+        <label for="score">Score:</label>
+        <input type="number" id="score" placeholder="Enter score" required>
+        
+        <button onclick="addScore()">Add Score</button>
+    </div>
+
+    <!-- Table to display players and their scores -->
+    <table>
+        <thead>
+            <tr>
+                <th>Player Name</th>
+                <th>Scores</th>
+                <th>Total Score</th>
+            </tr>
+        </thead>
+        <tbody id="scoreTable">
+            <!-- Rows will be added dynamically here -->
+        </tbody>
+    </table>
+
+    <script>
+        // Array to store players' names and their scores
+        let players = [];
+
+        // Function to add a score for the player (new or existing)
+        function addScore() {
+            const name = document.getElementById('name').value;
+            const score = parseInt(document.getElementById('score').value);
+
+            // Validate inputs
+            if (!name || isNaN(score)) {
+                alert("Please enter both a name and a valid score.");
+                return;
+            }
+
+            // Check if the player already exists
+            let existingPlayer = players.find(player => player.name === name);
+            if (existingPlayer) {
+                existingPlayer.scores.push(score);  // Add the new score to the existing player
+            } else {
+                // If new player, add them with the current score
+                players.push({ name: name, scores: [score] });
+                // Add player to dropdown list
+                addPlayerToDropdown(name);
+            }
+
+            // Clear the input fields
+            document.getElementById('name').value = '';
+            document.getElementById('score').value = '';
+
+            // Re-render the table
+            renderTable();
+        }
+
+        // Function to add a player to the dropdown menu
+        function addPlayerToDropdown(playerName) {
+            const dropdown = document.getElementById('player');
+            const option = document.createElement('option');
+            option.value = playerName;
+            option.textContent = playerName;
+            dropdown.appendChild(option);
+        }
+
+        // Function to update the player name input when a dropdown option is selected
+        function updatePlayerName() {
+            const dropdown = document.getElementById('player');
+            const selectedPlayerName = dropdown.value;
+            const nameInput = document.getElementById('name');
+            if (selectedPlayerName) {
+                nameInput.value = selectedPlayerName;
+            } else {
+                nameInput.value = ''; // Clear name input if no player is selected
+            }
+        }
+
+        // Function to render the table with players' scores and total score
+        function renderTable() {
+            const tableBody = document.getElementById('scoreTable');
+            tableBody.innerHTML = ''; // Clear the current table content
+
+            // Loop through the players array and create table rows
+            players.forEach(player => {
+                const row = document.createElement('tr');
+                const scores = player.scores.join(', '); // Join scores with a comma for display
+                const totalScore = player.scores.reduce((sum, score) => sum + score, 0); // Calculate total score
+                row.innerHTML = `
+                    <td>${player.name}</td>
+                    <td>${scores}</td>
+                    <td>${totalScore}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+    </script>
+
+</body>
+</html>
